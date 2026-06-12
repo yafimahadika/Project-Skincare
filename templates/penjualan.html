@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Data Penjualan - Sistem C4.5 Skincare{% endblock %}
+
+{% block content %}
+<div class="page-heading page-heading-actions">
+    <div>
+        <h1>Data Penjualan</h1>
+        <p>Kelola data transaksi penjualan produk skincare sebelum diproses C4.5.</p>
+    </div>
+    <div class="report-actions">
+        <button type="button" class="soft-button" data-bs-toggle="modal" data-bs-target="#modalUploadPenjualan">
+            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+            <span>Upload Excel</span>
+        </button>
+        <button type="button" class="action-button" data-bs-toggle="modal" data-bs-target="#modalTambahPenjualan">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Tambah Penjualan</span>
+        </button>
+    </div>
+</div>
+
+<section class="data-panel data-table-panel" data-table>
+    <div class="table-toolbar">
+        <div class="table-toolbar-group">
+            <div class="table-length">
+                <span>Tampilkan</span>
+                <div class="pretty-select">
+                    <select class="form-select form-select-sm" data-table-length>
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                    </select>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <span>data</span>
+            </div>
+            <div class="date-filter-group">
+                <label class="date-filter">
+                    <span>Dari</span>
+                    <input type="text" inputmode="numeric" placeholder="dd/mm/yyyy" data-date-from data-date-mask>
+                </label>
+                <label class="date-filter">
+                    <span>Ke</span>
+                    <input type="text" inputmode="numeric" placeholder="dd/mm/yyyy" data-date-to data-date-mask>
+                </label>
+            </div>
+        </div>
+        <div class="table-search">
+            <i class="bi bi-search"></i>
+            <input type="search" class="form-control form-control-sm" placeholder="Cari penjualan..." data-table-search>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0 modern-table">
+            <thead>
+                <tr>
+                    <th data-sort="number">No <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Tanggal <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Kode Produk <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Nama Produk <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Kategori <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Jumlah Terjual <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Harga Produk <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Total Penjualan <i class="bi bi-arrow-down-up"></i></th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data_penjualan %}
+                <tr>
+                    <td data-value="{{ loop.index }}">{{ loop.index }}</td>
+                    <td data-value="{{ item.tanggal_penjualan or '' }}" data-date="{{ item.tanggal_penjualan or '' }}">{{ item.tanggal_penjualan|format_date_id }}</td>
+                    <td data-value="{{ item.kode_produk or '' }}">{{ item.kode_produk or "-" }}</td>
+                    <td data-value="{{ item.nama_produk }}">{{ item.nama_produk }}</td>
+                    <td data-value="{{ item.kategori }}">{{ item.kategori }}</td>
+                    <td data-value="{{ item.jumlah_terjual }}">{{ item.jumlah_terjual }}</td>
+                    <td data-value="{{ item.harga }}">{{ item.harga|format_rupiah }}</td>
+                    <td data-value="{{ item.total_penjualan }}">{{ item.total_penjualan|format_rupiah }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button type="button" class="icon-action edit" data-bs-toggle="modal" data-bs-target="#modalEditPenjualan{{ item.id }}" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            {% if session.get("role") == "admin" %}
+                            <button type="button" class="icon-action delete" data-bs-toggle="modal" data-bs-target="#modalHapusPenjualan{{ item.id }}" title="Hapus">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr data-empty-row>
+                    <td colspan="9" class="text-center text-muted py-4">Belum ada data penjualan.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-footer">
+        <span data-table-info>Menampilkan 0 data</span>
+        <div class="pagination-controls">
+            <button type="button" class="page-button" data-table-prev>
+                <i class="bi bi-chevron-left"></i>
+                <span>Prev</span>
+            </button>
+            <span class="page-indicator" data-table-page>1 / 1</span>
+            <button type="button" class="page-button" data-table-next>
+                <span>Next</span>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="modalUploadPenjualan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('penjualan_upload') }}" enctype="multipart/form-data">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload Data Penjualan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">File Excel/CSV</label>
+                    <input type="file" class="form-control" name="file_penjualan" accept=".xlsx,.csv" required>
+                </div>
+                <div class="calculation-box">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>
+                        Kolom file: tanggal_penjualan, kode_produk, nama_produk, kategori, jumlah_terjual, harga, total_penjualan.
+                        Jika total_penjualan kosong, sistem menghitung otomatis dari harga x jumlah terjual.
+                    </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ url_for('penjualan_template') }}" class="btn soft-button">
+                    <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                    Download Format
+                </a>
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn action-button">Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalTambahPenjualan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('penjualan_tambah') }}">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Data Penjualan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                {% if data_produk %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Produk</label>
+                        <select class="form-select product-price-source" name="produk_id" required>
+                            <option value="" selected disabled>Pilih produk</option>
+                            {% for produk in data_produk %}
+                            <option value="{{ produk.id }}" data-harga="{{ produk.harga }}" data-stok="{{ produk.stok }}">
+                                {{ produk.kode_produk or "-" }} - {{ produk.nama_produk }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal</label>
+                        <input type="text" inputmode="numeric" class="form-control elegant-date custom-date-input" name="tanggal_penjualan" placeholder="dd/mm/yyyy" data-date-mask required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bulan</label>
+                        <select class="form-select" name="bulan" required>
+                            {% for bulan in ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"] %}
+                            <option value="{{ bulan }}">{{ bulan }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tahun</label>
+                        <input type="number" class="form-control" name="tahun" min="2020" max="2100" value="2026" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Jumlah Terjual</label>
+                        <input type="number" class="form-control sales-quantity" name="jumlah_terjual" min="0" value="0" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Harga Produk</label>
+                        <input type="text" class="form-control" data-price-preview value="Rp 0" readonly>
+                    </div>
+                    <div class="col-12">
+                        <div class="calculation-box">
+                            <i class="bi bi-calculator-fill"></i>
+                            <span>Total Penjualan dihitung otomatis dari harga produk x jumlah terjual.</span>
+                            <strong data-total-preview>Rp 0</strong>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-warning mb-0">Tambahkan data produk terlebih dahulu sebelum menginput penjualan.</div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn action-button" {% if not data_produk %}disabled{% endif %}>Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% for item in data_penjualan %}
+<div class="modal fade" id="modalEditPenjualan{{ item.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('penjualan_edit', penjualan_id=item.id) }}">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Data Penjualan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Produk</label>
+                        <select class="form-select product-price-source" name="produk_id" required>
+                            {% for produk in data_produk %}
+                            <option value="{{ produk.id }}" data-harga="{{ produk.harga }}" data-stok="{{ produk.stok }}" {% if produk.id == item.produk_id %}selected{% endif %}>
+                                {{ produk.kode_produk or "-" }} - {{ produk.nama_produk }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tanggal</label>
+                        <input type="text" inputmode="numeric" class="form-control elegant-date custom-date-input" name="tanggal_penjualan" value="{{ item.tanggal_penjualan|format_date_id }}" placeholder="dd/mm/yyyy" data-date-mask required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bulan</label>
+                        <select class="form-select" name="bulan" required>
+                            {% for bulan in ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"] %}
+                            <option value="{{ bulan }}" {% if bulan == item.bulan %}selected{% endif %}>{{ bulan }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tahun</label>
+                        <input type="number" class="form-control" name="tahun" min="2020" max="2100" value="{{ item.tahun }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Jumlah Terjual</label>
+                        <input type="number" class="form-control sales-quantity" name="jumlah_terjual" min="0" value="{{ item.jumlah_terjual }}" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Harga Produk</label>
+                        <input type="text" class="form-control" data-price-preview value="{{ item.harga|format_rupiah }}" readonly>
+                    </div>
+                    <div class="col-12">
+                        <div class="calculation-box">
+                            <i class="bi bi-calculator-fill"></i>
+                            <span>Total Penjualan dihitung otomatis dari harga produk x jumlah terjual.</span>
+                            <strong data-total-preview>Rp {{ "{:,.0f}".format(item.total_penjualan).replace(",", ".") }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn action-button">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if session.get("role") == "admin" %}
+<div class="modal fade" id="modalHapusPenjualan{{ item.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('penjualan_hapus', penjualan_id=item.id) }}">
+            <div class="modal-header">
+                <h5 class="modal-title">Hapus Penjualan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">Yakin ingin menghapus data penjualan ini?</p>
+                <strong>{{ item.nama_produk }} - {{ item.bulan }} {{ item.tahun }}</strong>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn danger-button">Hapus</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

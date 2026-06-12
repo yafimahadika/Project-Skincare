@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Dataset - Sistem C4.5 Skincare{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <h1>Dataset</h1>
+    <p>Data read-only hasil gabungan Data Produk dan Data Penjualan untuk proses algoritma C4.5.</p>
+</div>
+
+<section class="data-panel data-table-panel" data-table>
+    <div class="table-toolbar">
+        <div class="table-length">
+            <span>Tampilkan</span>
+            <div class="pretty-select">
+                <select class="form-select form-select-sm" data-table-length>
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <span>data</span>
+        </div>
+        <div class="table-search">
+            <i class="bi bi-search"></i>
+            <input type="search" class="form-control form-control-sm" placeholder="Cari dataset..." data-table-search>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0 modern-table">
+            <thead>
+                <tr>
+                    <th data-sort="number">No <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Produk <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Kategori <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Bulan <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Tahun <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Harga <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Terjual <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Total <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Label Sistem <i class="bi bi-arrow-down-up"></i></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data_dataset %}
+                <tr>
+                    <td data-value="{{ loop.index }}">{{ loop.index }}</td>
+                    <td data-value="{{ item.nama_produk }}">{{ item.nama_produk }}</td>
+                    <td data-value="{{ item.kategori }}">{{ item.kategori }}</td>
+                    <td data-value="{{ item.bulan }}">{{ item.bulan }}</td>
+                    <td data-value="{{ item.tahun }}">{{ item.tahun }}</td>
+                    <td data-value="{{ item.harga }}">Rp {{ "{:,.0f}".format(item.harga).replace(",", ".") }}</td>
+                    <td data-value="{{ item.jumlah_terjual }}">{{ item.jumlah_terjual }}</td>
+                    <td data-value="{{ item.total_penjualan }}">Rp {{ "{:,.0f}".format(item.total_penjualan).replace(",", ".") }}</td>
+                    <td data-value="{{ item.label_sistem or '' }}">
+                        <span class="status-badge {% if item.label_sistem == 'Laris' %}success{% else %}muted{% endif %}">
+                            {{ item.label_sistem or "-" }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr data-empty-row>
+                    <td colspan="9" class="text-center text-muted py-4">Belum ada dataset. Input data penjualan terlebih dahulu.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-footer">
+        <span data-table-info>Menampilkan 0 data</span>
+        <div class="pagination-controls">
+            <button type="button" class="page-button" data-table-prev>
+                <i class="bi bi-chevron-left"></i>
+                <span>Prev</span>
+            </button>
+            <span class="page-indicator" data-table-page>1 / 1</span>
+            <button type="button" class="page-button" data-table-next>
+                <span>Next</span>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+{% endblock %}

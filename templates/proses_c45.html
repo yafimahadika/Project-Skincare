@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Proses C4.5 - Sistem C4.5 Skincare{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+    <h1>Proses C4.5</h1>
+    <p>Pilih periode penjualan, lihat ringkasan data, lalu jalankan proses klasifikasi.</p>
+</div>
+
+<section class="data-panel mb-3">
+    <form class="report-filter mb-0" method="get" action="{{ url_for('proses_c45') }}">
+        <label>
+            <span>Tanggal Awal</span>
+            <input type="text" inputmode="numeric" name="tanggal_awal" value="{{ tanggal_awal }}" placeholder="dd/mm/yyyy" data-date-mask required>
+        </label>
+        <label>
+            <span>Tanggal Akhir</span>
+            <input type="text" inputmode="numeric" name="tanggal_akhir" value="{{ tanggal_akhir }}" placeholder="dd/mm/yyyy" data-date-mask required>
+        </label>
+        <button type="submit" class="soft-button">
+            <i class="bi bi-search-heart-fill"></i>
+            <span>Ambil Data</span>
+        </button>
+    </form>
+</section>
+
+{% if tanggal_awal and tanggal_akhir %}
+<div class="row g-3 dashboard-stats">
+    <div class="col-md-3">
+        <div class="summary-card stat-card pink">
+            <div class="stat-icon"><i class="bi bi-bag-check-fill"></i></div>
+            <span>Produk Ditemukan</span>
+            <strong>{{ total_dataset }}</strong>
+            <small>{{ tanggal_awal }} - {{ tanggal_akhir }}</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="summary-card stat-card peach">
+            <div class="stat-icon"><i class="bi bi-cart-check-fill"></i></div>
+            <span>Total Terjual</span>
+            <strong>{{ "%.0f"|format(total_terjual) }}</strong>
+            <small>Akumulasi periode</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="summary-card stat-card violet">
+            <div class="stat-icon"><i class="bi bi-cash-stack"></i></div>
+            <span>Total Penjualan</span>
+            <strong class="small-stat">{{ total_penjualan|format_rupiah }}</strong>
+            <small>Akumulasi rupiah</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="summary-card stat-card pink">
+            <div class="stat-icon"><i class="bi bi-speedometer2"></i></div>
+            <span>Rata-rata Terjual</span>
+            <strong>{{ "%.2f"|format(average_sold) }}</strong>
+            <small>Batas Laris/Tidak Laris</small>
+        </div>
+    </div>
+</div>
+
+{% if total_dataset == 0 %}
+<section class="dashboard-panel mt-3">
+    <div class="empty-state">
+        <i class="bi bi-database-exclamation"></i>
+        <h2>Data periode belum tersedia</h2>
+        <p>Tidak ada transaksi penjualan pada periode yang dipilih.</p>
+    </div>
+</section>
+{% else %}
+<section class="data-panel data-table-panel mt-3">
+    <div class="panel-heading">
+        <div>
+            <h2>Data yang Akan Diproses</h2>
+            <p>Data sudah digabung dan dijumlahkan per produk pada periode terpilih.</p>
+        </div>
+        <form method="post" action="{{ url_for('proses_c45') }}">
+            <input type="hidden" name="tanggal_awal" value="{{ tanggal_awal }}">
+            <input type="hidden" name="tanggal_akhir" value="{{ tanggal_akhir }}">
+            <button type="submit" class="action-button">
+                <i class="bi bi-play-circle-fill"></i>
+                <span>Proses C4.5</span>
+            </button>
+        </form>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0 modern-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Kode Produk</th>
+                    <th>Nama Produk</th>
+                    <th>Kategori</th>
+                    <th>Jumlah Terjual</th>
+                    <th>Total Penjualan</th>
+                    <th>Label Sistem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in classification_rows %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item.kode_produk or "-" }}</td>
+                    <td>{{ item.nama_produk }}</td>
+                    <td>{{ item.kategori }}</td>
+                    <td>{{ "%.0f"|format(item.jumlah_terjual) }}</td>
+                    <td>{{ item.total_penjualan|format_rupiah }}</td>
+                    <td>
+                        <span class="status-badge {% if item.hasil_klasifikasi == 'Laris' %}success{% else %}muted{% endif %}">
+                            {{ item.hasil_klasifikasi }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-7">
+        <section class="data-panel data-table-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Tabel Perhitungan Atribut</h2>
+                    <p>Gain ratio tertinggi dipakai sebagai atribut terbaik.</p>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle mb-0 modern-table">
+                    <thead>
+                        <tr>
+                            <th>Ranking</th>
+                            <th>Atribut</th>
+                            <th>Gain</th>
+                            <th>Split Info</th>
+                            <th>Gain Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in calculations %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item.label }}</td>
+                            <td>{{ "%.6f"|format(item.gain) }}</td>
+                            <td>{{ "%.6f"|format(item.split_info) }}</td>
+                            <td>
+                                <span class="status-badge {% if loop.first %}success{% else %}muted{% endif %}">
+                                    {{ "%.6f"|format(item.gain_ratio) }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-5">
+        <section class="dashboard-panel">
+            <div class="panel-heading compact">
+                <div>
+                    <h2>Rule Sementara</h2>
+                    <p>Aturan berdasarkan atribut terbaik dan label sistem.</p>
+                </div>
+            </div>
+            <div class="rule-list scroll-panel">
+                {% for rule in rules %}
+                <div class="rule-item">
+                    <i class="bi bi-diagram-2-fill"></i>
+                    <div>
+                        <strong>{{ rule.condition }}</strong>
+                        <span>Maka hasil = {{ rule.result }} berdasarkan {{ rule.total }} data</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endif %}
+{% else %}
+<section class="dashboard-panel">
+    <div class="empty-state">
+        <i class="bi bi-calendar-heart"></i>
+        <h2>Pilih periode data</h2>
+        <p>Isi tanggal awal dan tanggal akhir untuk mengambil data penjualan yang akan diproses.</p>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

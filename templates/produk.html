@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Data Produk - Sistem C4.5 Skincare{% endblock %}
+
+{% block content %}
+<div class="page-heading page-heading-actions">
+    <div>
+        <h1>Data Produk</h1>
+        <p>Kelola data master produk skincare yang digunakan dalam data penjualan.</p>
+    </div>
+    <div class="report-actions">
+        <button type="button" class="soft-button" data-bs-toggle="modal" data-bs-target="#modalUploadProduk">
+            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+            <span>Upload Produk</span>
+        </button>
+        <button type="button" class="action-button" data-bs-toggle="modal" data-bs-target="#modalTambahProduk">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Tambah Produk</span>
+        </button>
+    </div>
+</div>
+
+<section class="data-panel data-table-panel" data-table>
+    <div class="table-toolbar">
+        <div class="table-length">
+            <span>Tampilkan</span>
+            <select class="form-select form-select-sm" data-table-length>
+                <option value="5" selected>5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+            </select>
+            <span>data</span>
+        </div>
+        <div class="table-search">
+            <i class="bi bi-search"></i>
+            <input type="search" class="form-control form-control-sm" placeholder="Cari produk..." data-table-search>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0 modern-table">
+            <thead>
+                <tr>
+                    <th data-sort="number">No <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Kode <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Nama Produk <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Kategori <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Harga <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="number">Stok <i class="bi bi-arrow-down-up"></i></th>
+                    <th data-sort="text">Satuan <i class="bi bi-arrow-down-up"></i></th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data_produk %}
+                <tr>
+                    <td data-value="{{ loop.index }}">{{ loop.index }}</td>
+                    <td data-value="{{ item.kode_produk or '' }}">{{ item.kode_produk or "-" }}</td>
+                    <td data-value="{{ item.nama_produk }}">{{ item.nama_produk }}</td>
+                    <td data-value="{{ item.kategori }}">{{ item.kategori }}</td>
+                    <td data-value="{{ item.harga }}">Rp {{ "{:,.0f}".format(item.harga).replace(",", ".") }}</td>
+                    <td data-value="{{ item.stok }}">{{ item.stok }}</td>
+                    <td data-value="{{ item.satuan or 'pcs' }}">{{ item.satuan or "pcs" }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button type="button" class="icon-action edit" data-bs-toggle="modal" data-bs-target="#modalEditProduk{{ item.id }}" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            {% if session.get("role") == "admin" %}
+                            <button type="button" class="icon-action delete" data-bs-toggle="modal" data-bs-target="#modalHapusProduk{{ item.id }}" title="Hapus">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr data-empty-row>
+                    <td colspan="8" class="text-center text-muted py-4">Belum ada data produk.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-footer">
+        <span data-table-info>Menampilkan 0 data</span>
+        <div class="pagination-controls">
+            <button type="button" class="page-button" data-table-prev>
+                <i class="bi bi-chevron-left"></i>
+                <span>Prev</span>
+            </button>
+            <span class="page-indicator" data-table-page>1 / 1</span>
+            <button type="button" class="page-button" data-table-next>
+                <span>Next</span>
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="modalUploadProduk" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('produk_upload') }}" enctype="multipart/form-data">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload Data Produk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">File Excel/CSV</label>
+                    <input type="file" class="form-control" name="file_produk" accept=".xlsx,.csv" required>
+                </div>
+                <div class="calculation-box">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>
+                        Kolom file: kode_produk, nama_produk, kategori, harga, stok, satuan.
+                        Jika kode produk sudah ada, sistem akan memperbarui data produk tersebut.
+                    </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ url_for('produk_template') }}" class="btn soft-button">
+                    <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                    Download Format
+                </a>
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn action-button">Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalTambahProduk" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('produk_tambah') }}">
+            <div class="modal-header">
+                <h5 class="modal-title">Tambah Produk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Kode Produk</label>
+                        <input type="text" class="form-control" name="kode_produk" placeholder="PRD004" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Kategori</label>
+                        <input type="text" class="form-control" name="kategori" placeholder="Serum" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Nama Produk</label>
+                        <input type="text" class="form-control" name="nama_produk" placeholder="Nama produk skincare" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Harga</label>
+                        <input type="number" class="form-control" name="harga" min="0" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Stok</label>
+                        <input type="number" class="form-control" name="stok" min="0" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Satuan</label>
+                        <input type="text" class="form-control" name="satuan" value="pcs" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn action-button">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% for item in data_produk %}
+<div class="modal fade" id="modalEditProduk{{ item.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('produk_edit', produk_id=item.id) }}">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Produk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Kode Produk</label>
+                        <input type="text" class="form-control" name="kode_produk" value="{{ item.kode_produk or '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Kategori</label>
+                        <input type="text" class="form-control" name="kategori" value="{{ item.kategori }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Nama Produk</label>
+                        <input type="text" class="form-control" name="nama_produk" value="{{ item.nama_produk }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Harga</label>
+                        <input type="number" class="form-control" name="harga" min="0" value="{{ item.harga|int }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Stok</label>
+                        <input type="number" class="form-control" name="stok" min="0" value="{{ item.stok }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Satuan</label>
+                        <input type="text" class="form-control" name="satuan" value="{{ item.satuan or 'pcs' }}" required>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn action-button">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if session.get("role") == "admin" %}
+<div class="modal fade" id="modalHapusProduk{{ item.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <form class="modal-content app-modal" method="post" action="{{ url_for('produk_hapus', produk_id=item.id) }}">
+            <div class="modal-header">
+                <h5 class="modal-title">Hapus Produk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">Yakin ingin menghapus produk ini?</p>
+                <strong>{{ item.nama_produk }}</strong>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn danger-button">Hapus</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

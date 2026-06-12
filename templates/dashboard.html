@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistem C4.5 Skincare{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero">
+    <div>
+        <span class="eyebrow">Dashboard</span>
+        <h1>Ringkasan Penjualan Skincare</h1>
+        <p>Pantau data produk, penjualan, dan hasil klasifikasi C4.5 dalam satu halaman.</p>
+    </div>
+    <div class="hero-badge">
+        <i class="bi bi-flower1"></i>
+        <span>SR12</span>
+    </div>
+</div>
+
+<div class="row g-3 dashboard-stats">
+    <div class="col-md-4">
+        <div class="summary-card stat-card pink">
+            <div class="stat-icon">
+                <i class="bi bi-bag-heart-fill"></i>
+            </div>
+            <span>Total Produk</span>
+            <strong>{{ total_produk }}</strong>
+            <small>Produk skincare aktif</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="summary-card stat-card peach">
+            <div class="stat-icon">
+                <i class="bi bi-receipt-cutoff"></i>
+            </div>
+            <span>Data Penjualan</span>
+            <strong>{{ total_penjualan }}</strong>
+            <small>Dataset yang tersimpan</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="summary-card stat-card violet">
+            <div class="stat-icon">
+                <i class="bi bi-diagram-3-fill"></i>
+            </div>
+            <span>Hasil Klasifikasi</span>
+            <strong>{{ total_klasifikasi }}</strong>
+            <small>Riwayat proses C4.5</small>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="summary-card stat-card peach">
+            <div class="stat-icon">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <span>Produk Laris</span>
+            <strong>{{ total_laris }}</strong>
+            <small>Hasil proses C4.5</small>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="summary-card stat-card pink">
+            <div class="stat-icon">
+                <i class="bi bi-graph-down-arrow"></i>
+            </div>
+            <span>Tidak Laris</span>
+            <strong>{{ total_tidak_laris }}</strong>
+            <small>Hasil proses C4.5</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-lg-8">
+        <section class="dashboard-panel chart-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Diagram Data Sistem</h2>
+                    <p>Perbandingan jumlah data utama dalam aplikasi.</p>
+                </div>
+                <span class="panel-chip">Live Data</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas
+                    id="overviewChart"
+                    data-produk="{{ total_produk }}"
+                    data-penjualan="{{ total_penjualan }}"
+                    data-klasifikasi="{{ total_klasifikasi }}"
+                    aria-label="Diagram data sistem"
+                    role="img"></canvas>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-4">
+        <section class="dashboard-panel">
+            <div class="panel-heading compact">
+                <div>
+                    <h2>Status Sistem</h2>
+                    <p>Kesiapan modul utama.</p>
+                </div>
+            </div>
+            <div class="status-list">
+                <div class="status-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>Database</strong>
+                        <span>MySQL terhubung</span>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>Role Akses</strong>
+                        <span>Admin dan Staff aktif</span>
+                    </div>
+                </div>
+                <div class="status-item muted">
+                    <i class="bi bi-clock-fill"></i>
+                    <div>
+                        <strong>Algoritma C4.5</strong>
+                        <span>Siap dikembangkan</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
