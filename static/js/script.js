@@ -623,6 +623,7 @@ document.querySelectorAll("[data-table]").forEach((tablePanel) => {
     let currentPage = 1;
     let sortIndex = null;
     let sortDirection = "asc";
+    const sortableHeaders = Array.from(table.querySelectorAll("thead th[data-sort]"));
 
     function getPageSize() {
         if (!lengthSelect || lengthSelect.value === "all") {
@@ -698,18 +699,36 @@ document.querySelectorAll("[data-table]").forEach((tablePanel) => {
         const end = start + pageSize;
         const visibleRows = filteredRows.slice(start, end);
 
+        const emptyRow = tbody.querySelector("[data-empty-row]");
+
         allRows.forEach((row) => {
+            row.remove();
             row.style.display = "none";
         });
 
         visibleRows.forEach((row) => {
             row.style.display = "";
+            tbody.appendChild(row);
         });
 
-        const emptyRow = tbody.querySelector("[data-empty-row]");
         if (emptyRow) {
+            tbody.appendChild(emptyRow);
             emptyRow.style.display = totalRows === 0 ? "" : "none";
         }
+
+        sortableHeaders.forEach((header, index) => {
+            const icon = header.querySelector("i");
+
+            header.classList.toggle("sorted-asc", sortIndex === index && sortDirection === "asc");
+            header.classList.toggle("sorted-desc", sortIndex === index && sortDirection === "desc");
+
+            if (icon) {
+                const printHiddenClass = icon.classList.contains("print-hidden") ? " print-hidden" : "";
+                icon.className = sortIndex === index
+                    ? `bi ${sortDirection === "asc" ? "bi-sort-up" : "bi-sort-down"}${printHiddenClass}`
+                    : `bi bi-arrow-down-up${printHiddenClass}`;
+            }
+        });
 
         if (info) {
             const shownStart = totalRows === 0 ? 0 : start + 1;
@@ -730,7 +749,7 @@ document.querySelectorAll("[data-table]").forEach((tablePanel) => {
         }
     }
 
-    table.querySelectorAll("thead th[data-sort]").forEach((header, index) => {
+    sortableHeaders.forEach((header, index) => {
         header.addEventListener("click", () => {
             if (sortIndex === index) {
                 sortDirection = sortDirection === "asc" ? "desc" : "asc";
