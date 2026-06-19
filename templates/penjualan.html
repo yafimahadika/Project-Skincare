@@ -20,6 +20,9 @@
     </div>
 </div>
 
+{% if session.get("role") == "admin" %}
+<form method="post" action="{{ url_for('penjualan_hapus_terpilih') }}" data-bulk-form>
+{% endif %}
 <section class="data-panel data-table-panel" data-table>
     <div class="table-toolbar">
         <div class="table-toolbar-group">
@@ -49,9 +52,17 @@
                 </label>
             </div>
         </div>
-        <div class="table-search">
-            <i class="bi bi-search"></i>
-            <input type="search" class="form-control form-control-sm" placeholder="Cari penjualan..." data-table-search>
+        <div class="table-toolbar-actions">
+            <div class="table-search">
+                <i class="bi bi-search"></i>
+                <input type="search" class="form-control form-control-sm" placeholder="Cari penjualan..." data-table-search>
+            </div>
+            {% if session.get("role") == "admin" %}
+            <button type="submit" class="danger-button bulk-delete-button" data-bulk-delete-button disabled>
+                <i class="bi bi-trash3-fill"></i>
+                <span>Hapus Terpilih</span>
+            </button>
+            {% endif %}
         </div>
     </div>
 
@@ -59,6 +70,11 @@
         <table class="table table-striped align-middle mb-0 modern-table">
             <thead>
                 <tr>
+                    {% if session.get("role") == "admin" %}
+                    <th>
+                        <input type="checkbox" class="bulk-check" data-bulk-check-all aria-label="Pilih semua penjualan">
+                    </th>
+                    {% endif %}
                     <th data-sort="number">No <i class="bi bi-arrow-down-up"></i></th>
                     <th data-sort="text">Tanggal <i class="bi bi-arrow-down-up"></i></th>
                     <th data-sort="text">Kode Produk <i class="bi bi-arrow-down-up"></i></th>
@@ -73,6 +89,11 @@
             <tbody>
                 {% for item in data_penjualan %}
                 <tr>
+                    {% if session.get("role") == "admin" %}
+                    <td data-value="">
+                        <input type="checkbox" class="bulk-check" name="penjualan_ids" value="{{ item.id }}" data-bulk-check aria-label="Pilih penjualan {{ item.nama_produk }}">
+                    </td>
+                    {% endif %}
                     <td data-value="{{ loop.index }}">{{ loop.index }}</td>
                     <td data-value="{{ item.tanggal_penjualan or '' }}" data-date="{{ item.tanggal_penjualan or '' }}">{{ item.tanggal_penjualan|format_date_id }}</td>
                     <td data-value="{{ item.kode_produk or '' }}">{{ item.kode_produk or "-" }}</td>
@@ -96,7 +117,7 @@
                 </tr>
                 {% else %}
                 <tr data-empty-row>
-                    <td colspan="9" class="text-center text-muted py-4">Belum ada data penjualan.</td>
+                    <td colspan="{% if session.get('role') == 'admin' %}10{% else %}9{% endif %}" class="text-center text-muted py-4">Belum ada data penjualan.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -118,6 +139,9 @@
         </div>
     </div>
 </section>
+{% if session.get("role") == "admin" %}
+</form>
+{% endif %}
 
 <div class="modal fade" id="modalUploadPenjualan" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

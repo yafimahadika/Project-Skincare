@@ -20,6 +20,9 @@
     </div>
 </div>
 
+{% if session.get("role") == "admin" %}
+<form method="post" action="{{ url_for('produk_hapus_terpilih') }}" data-bulk-form>
+{% endif %}
 <section class="data-panel data-table-panel" data-table>
     <div class="table-toolbar">
         <div class="table-length">
@@ -34,9 +37,17 @@
             </select>
             <span>data</span>
         </div>
-        <div class="table-search">
-            <i class="bi bi-search"></i>
-            <input type="search" class="form-control form-control-sm" placeholder="Cari produk..." data-table-search>
+        <div class="table-toolbar-actions">
+            <div class="table-search">
+                <i class="bi bi-search"></i>
+                <input type="search" class="form-control form-control-sm" placeholder="Cari produk..." data-table-search>
+            </div>
+            {% if session.get("role") == "admin" %}
+            <button type="submit" class="danger-button bulk-delete-button" data-bulk-delete-button disabled>
+                <i class="bi bi-trash3-fill"></i>
+                <span>Hapus Terpilih</span>
+            </button>
+            {% endif %}
         </div>
     </div>
 
@@ -44,6 +55,11 @@
         <table class="table table-striped align-middle mb-0 modern-table">
             <thead>
                 <tr>
+                    {% if session.get("role") == "admin" %}
+                    <th>
+                        <input type="checkbox" class="bulk-check" data-bulk-check-all aria-label="Pilih semua produk">
+                    </th>
+                    {% endif %}
                     <th data-sort="number">No <i class="bi bi-arrow-down-up"></i></th>
                     <th data-sort="text">Kode <i class="bi bi-arrow-down-up"></i></th>
                     <th data-sort="text">Nama Produk <i class="bi bi-arrow-down-up"></i></th>
@@ -57,6 +73,11 @@
             <tbody>
                 {% for item in data_produk %}
                 <tr>
+                    {% if session.get("role") == "admin" %}
+                    <td data-value="">
+                        <input type="checkbox" class="bulk-check" name="produk_ids" value="{{ item.id }}" data-bulk-check aria-label="Pilih {{ item.nama_produk }}">
+                    </td>
+                    {% endif %}
                     <td data-value="{{ loop.index }}">{{ loop.index }}</td>
                     <td data-value="{{ item.kode_produk or '' }}">{{ item.kode_produk or "-" }}</td>
                     <td data-value="{{ item.nama_produk }}">{{ item.nama_produk }}</td>
@@ -79,7 +100,7 @@
                 </tr>
                 {% else %}
                 <tr data-empty-row>
-                    <td colspan="8" class="text-center text-muted py-4">Belum ada data produk.</td>
+                    <td colspan="{% if session.get('role') == 'admin' %}9{% else %}8{% endif %}" class="text-center text-muted py-4">Belum ada data produk.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -101,6 +122,9 @@
         </div>
     </div>
 </section>
+{% if session.get("role") == "admin" %}
+</form>
+{% endif %}
 
 <div class="modal fade" id="modalUploadProduk" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

@@ -635,6 +635,14 @@ body.sidebar-collapsed .sidebar-link i {
     gap: 12px;
 }
 
+.table-toolbar-actions {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
 .table-footer {
     color: #9c7088;
     font-size: 13px;
@@ -1026,6 +1034,28 @@ body.sidebar-collapsed .sidebar-link i {
     color: #75445c;
     min-height: 38px;
     padding-left: 36px;
+}
+
+.bulk-delete-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.bulk-delete-button {
+    flex: 0 0 auto;
+    min-width: 150px;
+    white-space: nowrap;
+}
+
+.bulk-delete-button span {
+    white-space: nowrap;
+}
+
+.bulk-check {
+    accent-color: #ce5794;
+    cursor: pointer;
+    height: 16px;
+    width: 16px;
 }
 
 .modern-table thead th {
@@ -1953,6 +1983,13 @@ body.sidebar-collapsed .sidebar-link i {
     .table-footer {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .table-toolbar-actions {
+        align-items: stretch;
+        flex-direction: column;
+        margin-left: 0;
+        width: 100%;
     }
 
     .table-search {

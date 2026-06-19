@@ -716,15 +716,16 @@ document.querySelectorAll("[data-table]").forEach((tablePanel) => {
             emptyRow.style.display = totalRows === 0 ? "" : "none";
         }
 
-        sortableHeaders.forEach((header, index) => {
+    sortableHeaders.forEach((header, index) => {
             const icon = header.querySelector("i");
+            const columnIndex = header.cellIndex;
 
-            header.classList.toggle("sorted-asc", sortIndex === index && sortDirection === "asc");
-            header.classList.toggle("sorted-desc", sortIndex === index && sortDirection === "desc");
+            header.classList.toggle("sorted-asc", sortIndex === columnIndex && sortDirection === "asc");
+            header.classList.toggle("sorted-desc", sortIndex === columnIndex && sortDirection === "desc");
 
             if (icon) {
                 const printHiddenClass = icon.classList.contains("print-hidden") ? " print-hidden" : "";
-                icon.className = sortIndex === index
+                icon.className = sortIndex === columnIndex
                     ? `bi ${sortDirection === "asc" ? "bi-sort-up" : "bi-sort-down"}${printHiddenClass}`
                     : `bi bi-arrow-down-up${printHiddenClass}`;
             }
@@ -749,12 +750,14 @@ document.querySelectorAll("[data-table]").forEach((tablePanel) => {
         }
     }
 
-    sortableHeaders.forEach((header, index) => {
+    sortableHeaders.forEach((header) => {
         header.addEventListener("click", () => {
-            if (sortIndex === index) {
+            const columnIndex = header.cellIndex;
+
+            if (sortIndex === columnIndex) {
                 sortDirection = sortDirection === "asc" ? "desc" : "asc";
             } else {
-                sortIndex = index;
+                sortIndex = columnIndex;
                 sortDirection = "asc";
             }
 
@@ -848,4 +851,42 @@ document.querySelectorAll("[data-print-report]").forEach((button) => {
     button.addEventListener("click", () => {
         window.print();
     });
+});
+
+document.querySelectorAll("[data-bulk-form]").forEach((form) => {
+    const checkAll = form.querySelector("[data-bulk-check-all]");
+    const checks = Array.from(form.querySelectorAll("[data-bulk-check]"));
+    const deleteButton = form.querySelector("[data-bulk-delete-button]");
+
+    function updateBulkState() {
+        const checkedCount = checks.filter((check) => check.checked).length;
+
+        if (deleteButton) {
+            deleteButton.disabled = checkedCount === 0;
+            const label = deleteButton.querySelector("span");
+            if (label) {
+                label.textContent = checkedCount > 0 ? `Hapus Terpilih (${checkedCount})` : "Hapus Terpilih";
+            }
+        }
+
+        if (checkAll) {
+            checkAll.checked = checkedCount > 0 && checkedCount === checks.length;
+            checkAll.indeterminate = checkedCount > 0 && checkedCount < checks.length;
+        }
+    }
+
+    if (checkAll) {
+        checkAll.addEventListener("change", () => {
+            checks.forEach((check) => {
+                check.checked = checkAll.checked;
+            });
+            updateBulkState();
+        });
+    }
+
+    checks.forEach((check) => {
+        check.addEventListener("change", updateBulkState);
+    });
+
+    updateBulkState();
 });

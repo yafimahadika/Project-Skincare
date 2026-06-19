@@ -693,6 +693,45 @@ def produk_hapus(produk_id):
     return redirect(url_for("produk"))
 
 
+@app.route("/produk/hapus-terpilih", methods=["POST"])
+@login_required
+@admin_required
+def produk_hapus_terpilih():
+    produk_ids = [parse_int(item) for item in request.form.getlist("produk_ids") if parse_int(item) > 0]
+
+    if not produk_ids:
+        flash("Pilih minimal satu produk yang ingin dihapus.", "warning")
+        return redirect(url_for("produk"))
+
+    placeholders = ", ".join(["%s"] * len(produk_ids))
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        f"SELECT DISTINCT produk_id FROM penjualan WHERE produk_id IN ({placeholders})",
+        tuple(produk_ids),
+    )
+    used_ids = {item["produk_id"] for item in cursor.fetchall()}
+    deletable_ids = [produk_id for produk_id in produk_ids if produk_id not in used_ids]
+
+    deleted = 0
+    if deletable_ids:
+        delete_placeholders = ", ".join(["%s"] * len(deletable_ids))
+        cursor.execute(f"DELETE FROM produk WHERE id IN ({delete_placeholders})", tuple(deletable_ids))
+        deleted = cursor.rowcount
+
+    mysql.connection.commit()
+    cursor.close()
+
+    skipped = len(set(produk_ids)) - len(set(deletable_ids))
+    if deleted and skipped:
+        flash(f"{deleted} produk berhasil dihapus, {skipped} produk dilewati karena sudah digunakan pada data penjualan.", "warning")
+    elif deleted:
+        flash(f"{deleted} produk berhasil dihapus.", "success")
+    else:
+        flash("Produk terpilih tidak dapat dihapus karena sudah digunakan pada data penjualan.", "warning")
+
+    return redirect(url_for("produk"))
+
+
 @app.route("/penjualan")
 @login_required
 def penjualan():
@@ -939,6 +978,27 @@ def penjualan_hapus(penjualan_id):
     mysql.connection.commit()
     cursor.close()
     flash("Data penjualan berhasil dihapus.", "success")
+    return redirect(url_for("penjualan"))
+
+
+@app.route("/penjualan/hapus-terpilih", methods=["POST"])
+@login_required
+@admin_required
+def penjualan_hapus_terpilih():
+    penjualan_ids = [parse_int(item) for item in request.form.getlist("penjualan_ids") if parse_int(item) > 0]
+
+    if not penjualan_ids:
+        flash("Pilih minimal satu data penjualan yang ingin dihapus.", "warning")
+        return redirect(url_for("penjualan"))
+
+    placeholders = ", ".join(["%s"] * len(penjualan_ids))
+    cursor = mysql.connection.cursor()
+    cursor.execute(f"DELETE FROM penjualan WHERE id IN ({placeholders})", tuple(penjualan_ids))
+    deleted = cursor.rowcount
+    mysql.connection.commit()
+    cursor.close()
+
+    flash(f"{deleted} data penjualan berhasil dihapus.", "success")
     return redirect(url_for("penjualan"))
 
 
