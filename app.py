@@ -454,6 +454,38 @@ def dashboard():
     total_laris = cursor.fetchone()["total"]
     cursor.execute("SELECT COUNT(*) AS total FROM hasil_klasifikasi WHERE hasil_klasifikasi = 'Tidak Laris'")
     total_tidak_laris = cursor.fetchone()["total"]
+    cursor.execute(
+        """
+        SELECT
+            p.kode_produk,
+            p.nama_produk,
+            p.kategori,
+            SUM(pjl.jumlah_terjual) AS total_terjual,
+            SUM(pjl.total_penjualan) AS total_penjualan
+        FROM penjualan pjl
+        JOIN produk p ON p.id = pjl.produk_id
+        GROUP BY p.id, p.kode_produk, p.nama_produk, p.kategori
+        ORDER BY total_terjual DESC, total_penjualan DESC
+        LIMIT 5
+        """
+    )
+    top_produk_rows = cursor.fetchall()
+    cursor.execute("SELECT COALESCE(SUM(jumlah_terjual), 0) AS total FROM penjualan")
+    total_produk_terjual = float(cursor.fetchone()["total"] or 0)
+    produk_terlaris = top_produk_rows[0] if top_produk_rows else None
+    produk_terlaris_persen = (
+        (float(produk_terlaris["total_terjual"] or 0) / total_produk_terjual) * 100
+        if produk_terlaris and total_produk_terjual else 0
+    )
+    top_produk_chart = [
+        {
+            "nama_produk": item["nama_produk"],
+            "total_terjual": float(item["total_terjual"] or 0),
+            "persentase": round((float(item["total_terjual"] or 0) / total_produk_terjual) * 100, 2)
+            if total_produk_terjual else 0,
+        }
+        for item in top_produk_rows
+    ]
     cursor.close()
 
     return render_template(
@@ -463,6 +495,10 @@ def dashboard():
         total_klasifikasi=total_klasifikasi,
         total_laris=total_laris,
         total_tidak_laris=total_tidak_laris,
+        produk_terlaris=produk_terlaris,
+        produk_terlaris_persen=produk_terlaris_persen,
+        total_produk_terjual=total_produk_terjual,
+        top_produk_chart=top_produk_chart,
     )
 
 

@@ -169,6 +169,62 @@ if (overviewChart && window.Chart) {
     });
 }
 
+const topProductChart = document.getElementById("topProductChart");
+
+if (topProductChart && window.Chart) {
+    const products = JSON.parse(topProductChart.dataset.products || "[]");
+    const labels = products.length ? products.map((item) => item.nama_produk) : ["Belum ada data"];
+    const values = products.length ? products.map((item) => item.total_terjual) : [0];
+
+    new Chart(topProductChart, {
+        type: "doughnut",
+        data: {
+            labels,
+            datasets: [
+                {
+                    data: values,
+                    backgroundColor: ["#e875a8", "#ff9f87", "#b66ad6", "#f3bf6c", "#70c6ba"],
+                    borderColor: "#ffffff",
+                    borderWidth: 3,
+                    hoverOffset: 8,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "58%",
+            plugins: {
+                legend: {
+                    position: "right",
+                    labels: {
+                        boxWidth: 12,
+                        color: "#75445c",
+                        font: {
+                            weight: 700,
+                        },
+                    },
+                },
+                tooltip: {
+                    backgroundColor: "#75445c",
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label(context) {
+                            const item = products[context.dataIndex];
+                            if (!item) {
+                                return "Belum ada data";
+                            }
+
+                            return `${item.nama_produk}: ${item.total_terjual} terjual (${item.persentase}%)`;
+                        },
+                    },
+                },
+            },
+        },
+    });
+}
+
 document.querySelectorAll(".pretty-select").forEach((wrapper) => {
     const select = wrapper.querySelector("select");
 

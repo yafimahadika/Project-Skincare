@@ -123,7 +123,11 @@
                             {{ item.hasil_klasifikasi }}
                         </span>
                     </td>
-                    <td data-value="{{ item.keterangan or '' }}">{{ item.keterangan or "-" }}</td>
+                    <td data-value="{{ item.keterangan or '' }}">
+                        <button type="button" class="icon-action detail" data-bs-toggle="modal" data-bs-target="#modalKeteranganHasil{{ item.id }}" title="Lihat keterangan">
+                            <i class="bi bi-info-circle-fill"></i>
+                        </button>
+                    </td>
                 </tr>
                 {% else %}
                 <tr data-empty-row>
@@ -151,4 +155,31 @@
         </div>
     </div>
 </section>
+
+{% for item in hasil %}
+<div class="modal fade" id="modalKeteranganHasil{{ item.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content app-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Keterangan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-summary">
+                    <span>{{ item.tanggal_awal|format_period(item.tanggal_akhir) }}</span>
+                    <strong>{{ item.nama_produk }}</strong>
+                    <small>{{ item.kode_produk or "-" }} · {{ item.kategori }}</small>
+                </div>
+                <div class="detail-note">
+                    <i class="bi bi-chat-square-text-fill"></i>
+                    <p>{{ item.keterangan or "-" }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn soft-button" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

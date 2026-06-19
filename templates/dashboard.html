@@ -69,6 +69,62 @@
 </div>
 
 <div class="row g-3 mt-1">
+    <div class="col-lg-4">
+        <section class="dashboard-panel bestseller-panel">
+            <div class="panel-heading compact">
+                <div>
+                    <h2>Produk Terlaris</h2>
+                    <p>Berdasarkan total jumlah terjual.</p>
+                </div>
+                <span class="panel-chip">Real Data</span>
+            </div>
+            {% if produk_terlaris %}
+            <div class="bestseller-card">
+                <div class="bestseller-rank">
+                    <i class="bi bi-trophy-fill"></i>
+                    <span>#1</span>
+                </div>
+                <div class="bestseller-info">
+                    <strong>{{ produk_terlaris.nama_produk }}</strong>
+                    <span>{{ produk_terlaris.kode_produk or "-" }} · {{ produk_terlaris.kategori }}</span>
+                </div>
+                <div class="bestseller-percent">
+                    <strong>{{ "%.1f"|format(produk_terlaris_persen) }}%</strong>
+                    <span>{{ produk_terlaris.total_terjual|int }} dari {{ total_produk_terjual|int }} terjual</span>
+                </div>
+                <div class="bestseller-bar">
+                    <span style="width: {{ produk_terlaris_persen }}%"></span>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-mini">
+                <i class="bi bi-receipt"></i>
+                <span>Belum ada data penjualan.</span>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+    <div class="col-lg-8">
+        <section class="dashboard-panel chart-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Bagan Top Produk Terjual</h2>
+                    <p>Persentase dihitung dari total jumlah terjual seluruh produk.</p>
+                </div>
+                <span class="panel-chip">Top 5</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas
+                    id="topProductChart"
+                    data-products='{{ top_produk_chart|tojson }}'
+                    aria-label="Bagan produk terlaris"
+                    role="img"></canvas>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
     <div class="col-lg-8">
         <section class="dashboard-panel chart-panel">
             <div class="panel-heading">
