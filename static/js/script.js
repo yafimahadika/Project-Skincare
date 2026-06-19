@@ -225,6 +225,80 @@ if (topProductChart && window.Chart) {
     });
 }
 
+const monthlySalesChart = document.getElementById("monthlySalesChart");
+
+if (monthlySalesChart && window.Chart) {
+    const monthlyData = JSON.parse(monthlySalesChart.dataset.monthly || "[]");
+    const labels = monthlyData.length ? monthlyData.map((item) => item.label) : ["Belum ada data"];
+    const values = monthlyData.length ? monthlyData.map((item) => item.total_penjualan) : [0];
+
+    new Chart(monthlySalesChart, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: "Total Penjualan",
+                    data: values,
+                    borderColor: "#ce5794",
+                    backgroundColor: "rgba(206, 87, 148, 0.14)",
+                    borderWidth: 3,
+                    fill: true,
+                    pointBackgroundColor: "#ffffff",
+                    pointBorderColor: "#ce5794",
+                    pointBorderWidth: 3,
+                    pointRadius: 5,
+                    tension: 0.35,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                tooltip: {
+                    backgroundColor: "#75445c",
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label(context) {
+                            return formatRupiah(context.raw || 0);
+                        },
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false,
+                    },
+                    ticks: {
+                        color: "#9c7088",
+                        font: {
+                            weight: 700,
+                        },
+                    },
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: "#a77b94",
+                        callback(value) {
+                            return formatRupiah(value);
+                        },
+                    },
+                    grid: {
+                        color: "rgba(219, 145, 184, 0.18)",
+                    },
+                },
+            },
+        },
+    });
+}
+
 document.querySelectorAll(".pretty-select").forEach((wrapper) => {
     const select = wrapper.querySelector("select");
 

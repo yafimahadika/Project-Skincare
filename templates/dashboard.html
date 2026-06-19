@@ -66,6 +66,37 @@
             <small>Hasil proses C4.5</small>
         </div>
     </div>
+    <div class="col-md-12">
+        <div class="summary-card stat-card violet">
+            <div class="stat-icon">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <span>Total Penjualan Bulanan</span>
+            <strong>{{ total_penjualan_bulanan|format_rupiah }}</strong>
+            <small>Akumulasi penjualan dari data bulanan</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-1">
+    <div class="col-12">
+        <section class="dashboard-panel chart-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Grafik Total Penjualan Bulanan</h2>
+                    <p>Perkembangan nominal penjualan berdasarkan bulan dari data real.</p>
+                </div>
+                <span class="panel-chip">Real Data</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas
+                    id="monthlySalesChart"
+                    data-monthly='{{ monthly_sales_chart|tojson }}'
+                    aria-label="Grafik total penjualan bulanan"
+                    role="img"></canvas>
+            </div>
+        </section>
+    </div>
 </div>
 
 <div class="row g-3 mt-1">
@@ -86,7 +117,7 @@
                 </div>
                 <div class="bestseller-info">
                     <strong>{{ produk_terlaris.nama_produk }}</strong>
-                    <span>{{ produk_terlaris.kode_produk or "-" }} · {{ produk_terlaris.kategori }}</span>
+                    <span>{{ produk_terlaris.kode_produk or "-" }} - {{ produk_terlaris.kategori }}</span>
                 </div>
                 <div class="bestseller-percent">
                     <strong>{{ "%.1f"|format(produk_terlaris_persen) }}%</strong>
@@ -165,7 +196,7 @@
                     <i class="bi bi-check-circle-fill"></i>
                     <div>
                         <strong>Role Akses</strong>
-                        <span>Admin dan Staff aktif</span>
+                        <span>Admin dan Owner aktif</span>
                     </div>
                 </div>
                 <div class="status-item muted">

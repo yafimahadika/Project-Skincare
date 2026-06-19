@@ -486,6 +486,31 @@ def dashboard():
         }
         for item in top_produk_rows
     ]
+    cursor.execute(
+        """
+        SELECT
+            YEAR(tanggal_penjualan) AS tahun,
+            MONTH(tanggal_penjualan) AS bulan_angka,
+            SUM(total_penjualan) AS total_penjualan,
+            SUM(jumlah_terjual) AS total_terjual
+        FROM penjualan
+        WHERE tanggal_penjualan IS NOT NULL
+        GROUP BY YEAR(tanggal_penjualan), MONTH(tanggal_penjualan)
+        ORDER BY tahun DESC, bulan_angka DESC
+        LIMIT 12
+        """
+    )
+    monthly_rows = list(cursor.fetchall())
+    monthly_rows.reverse()
+    monthly_sales_chart = [
+        {
+            "label": f"{month_name_id(int(item['bulan_angka']))[:3]} {item['tahun']}",
+            "total_penjualan": float(item["total_penjualan"] or 0),
+            "total_terjual": float(item["total_terjual"] or 0),
+        }
+        for item in monthly_rows
+    ]
+    total_penjualan_bulanan = sum(item["total_penjualan"] for item in monthly_sales_chart)
     cursor.close()
 
     return render_template(
@@ -499,11 +524,14 @@ def dashboard():
         produk_terlaris_persen=produk_terlaris_persen,
         total_produk_terjual=total_produk_terjual,
         top_produk_chart=top_produk_chart,
+        monthly_sales_chart=monthly_sales_chart,
+        total_penjualan_bulanan=total_penjualan_bulanan,
     )
 
 
 @app.route("/produk")
 @login_required
+@admin_required
 def produk():
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT * FROM produk ORDER BY id DESC")
@@ -514,6 +542,7 @@ def produk():
 
 @app.route("/produk/tambah", methods=["POST"])
 @login_required
+@admin_required
 def produk_tambah():
     kode_produk = request.form.get("kode_produk", "").strip().upper()
     nama_produk = request.form.get("nama_produk", "").strip()
@@ -547,6 +576,7 @@ def produk_tambah():
 
 @app.route("/produk/edit/<int:produk_id>", methods=["POST"])
 @login_required
+@admin_required
 def produk_edit(produk_id):
     kode_produk = request.form.get("kode_produk", "").strip().upper()
     nama_produk = request.form.get("nama_produk", "").strip()
@@ -581,6 +611,7 @@ def produk_edit(produk_id):
 
 @app.route("/produk/upload", methods=["POST"])
 @login_required
+@admin_required
 def produk_upload():
     uploaded_file = request.files.get("file_produk")
 
@@ -633,6 +664,7 @@ def produk_upload():
 
 @app.route("/produk/template")
 @login_required
+@admin_required
 def produk_template():
     workbook = Workbook()
     sheet = workbook.active
@@ -734,6 +766,7 @@ def produk_hapus_terpilih():
 
 @app.route("/penjualan")
 @login_required
+@admin_required
 def penjualan():
     cursor = mysql.connection.cursor()
     cursor.execute(
@@ -753,6 +786,7 @@ def penjualan():
 
 @app.route("/penjualan/tambah", methods=["POST"])
 @login_required
+@admin_required
 def penjualan_tambah():
     produk_id = request.form.get("produk_id", "").strip()
     tanggal_penjualan = normalize_date_input(request.form.get("tanggal_penjualan", ""))
@@ -790,6 +824,7 @@ def penjualan_tambah():
 
 @app.route("/penjualan/edit/<int:penjualan_id>", methods=["POST"])
 @login_required
+@admin_required
 def penjualan_edit(penjualan_id):
     produk_id = request.form.get("produk_id", "").strip()
     tanggal_penjualan = normalize_date_input(request.form.get("tanggal_penjualan", ""))
@@ -836,6 +871,7 @@ def penjualan_edit(penjualan_id):
 
 @app.route("/penjualan/upload", methods=["POST"])
 @login_required
+@admin_required
 def penjualan_upload():
     uploaded_file = request.files.get("file_penjualan")
 
@@ -921,6 +957,7 @@ def penjualan_upload():
 
 @app.route("/penjualan/template")
 @login_required
+@admin_required
 def penjualan_template():
     workbook = Workbook()
     sheet = workbook.active
@@ -1181,9 +1218,9 @@ def user_tambah():
     nama = request.form.get("nama", "").strip()
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
-    role = request.form.get("role", "staff").strip()
+    role = request.form.get("role", "owner").strip()
 
-    if not nama or not username or not password or role not in ("admin", "staff"):
+    if not nama or not username or not password or role not in ("admin", "owner"):
         flash("Nama, username, password, dan role wajib diisi.", "warning")
         return redirect(url_for("users"))
 
@@ -1213,14 +1250,14 @@ def user_edit(user_id):
     nama = request.form.get("nama", "").strip()
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "").strip()
-    role = request.form.get("role", "staff").strip()
+    role = request.form.get("role", "owner").strip()
 
-    if not nama or not username or role not in ("admin", "staff"):
+    if not nama or not username or role not in ("admin", "owner"):
         flash("Nama, username, dan role wajib diisi.", "warning")
         return redirect(url_for("users"))
 
     if user_id == session.get("user_id") and role != "admin":
-        flash("Akun yang sedang login tidak boleh mengubah role sendiri menjadi Staff.", "warning")
+        flash("Akun yang sedang login tidak boleh mengubah role sendiri menjadi Owner.", "warning")
         return redirect(url_for("users"))
 
     try:

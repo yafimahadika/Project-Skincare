@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     nama VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'staff') NOT NULL DEFAULT 'staff',
+    role ENUM('admin', 'owner') NOT NULL DEFAULT 'owner',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS hasil_klasifikasi (
 INSERT INTO users (nama, username, password, role)
 VALUES
 ('Administrator', 'admin', 'scrypt:32768:8:1$wRNdk9lspkvz9hP9$2ba1080a5c034cd1d3316b42cf55f6ee8eb01848d2c036bca0842e7facf95fc64923dfc64f8a6e11efe484b78bd4c73cdb66d259e229e563571d1307e24500f3', 'admin'),
-('Staff Operator', 'staff', 'scrypt:32768:8:1$3ugNWCF6D7t6OuXV$6535f5ce38e745fb2591316d7c54d17c5d1dbd8982df6ee8994324f18213ba6cd9ac4713b63354aec8cee28c3c5ac31ff6513c314cbbc2989e28dcc73f5a6750', 'staff')
+('Owner Toko', 'owner', 'scrypt:32768:8:1$qgDnPsOKq79WE24U$315f7f6e287119b45cbcd6d4061b55bb4db8decf0bd908464f57c6a508306731c71185bee8ad9caff90e573ca798063334b933532e2f058fd173f5e40b82a686', 'owner')
 ON DUPLICATE KEY UPDATE username = VALUES(username);
 
 INSERT INTO produk (kode_produk, nama_produk, kategori, harga, stok, satuan)

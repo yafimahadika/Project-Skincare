@@ -27,6 +27,7 @@
                     <i class="bi bi-grid-1x2-fill"></i>
                     <span>Dashboard</span>
                 </a>
+                {% if session.get("role") == "admin" %}
                 <a class="sidebar-link {% if request.endpoint == 'produk' %}active{% endif %}" href="{{ url_for('produk') }}">
                     <i class="bi bi-bag-heart-fill"></i>
                     <span>Data Produk</span>
@@ -35,7 +36,6 @@
                     <i class="bi bi-receipt-cutoff"></i>
                     <span>Data Penjualan</span>
                 </a>
-                {% if session.get("role") == "admin" %}
                 <a class="sidebar-link {% if request.endpoint == 'proses_c45' %}active{% endif %}" href="{{ url_for('proses_c45') }}">
                     <i class="bi bi-diagram-3-fill"></i>
                     <span>Proses C4.5</span>

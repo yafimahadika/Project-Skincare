@@ -6,7 +6,7 @@
 <div class="page-heading page-heading-actions">
     <div>
         <h1>Data User</h1>
-        <p>Kelola akun Admin dan Staff yang dapat mengakses sistem.</p>
+        <p>Kelola akun Admin dan Owner yang dapat mengakses sistem.</p>
     </div>
     <button type="button" class="action-button" data-bs-toggle="modal" data-bs-target="#modalTambahUser">
         <i class="bi bi-person-plus-fill"></i>
@@ -115,7 +115,7 @@
                         <label class="form-label">Role</label>
                         <select class="form-select" name="role" required>
                             <option value="admin">Admin</option>
-                            <option value="staff" selected>Staff</option>
+                            <option value="owner" selected>Owner</option>
                         </select>
                     </div>
                     <div class="col-12">
@@ -154,7 +154,7 @@
                         <label class="form-label">Role</label>
                         <select class="form-select" name="role" required>
                             <option value="admin" {% if item.role == "admin" %}selected{% endif %}>Admin</option>
-                            <option value="staff" {% if item.role == "staff" %}selected{% endif %}>Staff</option>
+                            <option value="owner" {% if item.role == "owner" %}selected{% endif %}>Owner</option>
                         </select>
                     </div>
                     <div class="col-12">
